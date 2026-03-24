@@ -1,0 +1,19 @@
+module vagas();
+
+
+
+endmodule
+
+module Mux2p1( E, S, Z );
+	
+	input [1:0] E; // entradas
+	input S; // entrada de seleção
+	output Z; // saída
+	wire as, bs, ns; // saída
+	
+	and a1( bs, S, E[0] );
+	not n1( ns, S );
+	and a2( as, E[1], ns );
+	or o1( Z, as, bs );
+
+endmodule

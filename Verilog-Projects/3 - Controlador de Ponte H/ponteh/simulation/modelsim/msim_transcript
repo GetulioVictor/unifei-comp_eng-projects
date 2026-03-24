@@ -1,0 +1,42 @@
+# Reading C:/intelFPGA_lite/18.1/modelsim_ase/tcl/vsim/pref.tcl
+# do ponteh_run_msim_rtl_verilog.do
+# if {[file exists rtl_work]} {
+# 	vdel -lib rtl_work -all
+# }
+# vlib rtl_work
+# vmap work rtl_work
+# Model Technology ModelSim - Intel FPGA Edition vmap 10.5b Lib Mapping Utility 2016.10 Oct  5 2016
+# vmap work rtl_work 
+# Copying C:/intelFPGA_lite/18.1/modelsim_ase/win32aloem/../modelsim.ini to modelsim.ini
+# Modifying modelsim.ini
+# 
+# vlog -vlog01compat -work work +incdir+C:/Users/gev/Downloads/ponteh {C:/Users/gev/Downloads/ponteh/ponteh.v}
+# Model Technology ModelSim - Intel FPGA Edition vlog 10.5b Compiler 2016.10 Oct  5 2016
+# Start time: 18:03:43 on Jun 07,2023
+# vlog -reportprogress 300 -vlog01compat -work work "+incdir+C:/Users/gev/Downloads/ponteh" C:/Users/gev/Downloads/ponteh/ponteh.v 
+# -- Compiling module ponteh
+# -- Compiling module divisor
+# -- Compiling module modulacao
+# -- Compiling module saidas
+# 
+# Top level modules:
+# 	ponteh
+# End time: 18:03:43 on Jun 07,2023, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# 
+# vlog -vlog01compat -work work +incdir+C:/Users/gev/Downloads/ponteh {C:/Users/gev/Downloads/ponteh/ponteh_tb.v}
+# Model Technology ModelSim - Intel FPGA Edition vlog 10.5b Compiler 2016.10 Oct  5 2016
+# Start time: 18:03:43 on Jun 07,2023
+# vlog -reportprogress 300 -vlog01compat -work work "+incdir+C:/Users/gev/Downloads/ponteh" C:/Users/gev/Downloads/ponteh/ponteh_tb.v 
+# -- Compiling module ponteh_tb
+# ** Error: (vlog-13069) C:/Users/gev/Downloads/ponteh/ponteh_tb.v(4): near "[": syntax error, unexpected '[', expecting IDENTIFIER or TYPE_IDENTIFIER or NETTYPE_IDENTIFIER.
+# ** Error: (vlog-13069) C:/Users/gev/Downloads/ponteh/ponteh_tb.v(12): near "end": syntax error, unexpected end.
+# ** Error: C:/Users/gev/Downloads/ponteh/ponteh_tb.v(97): (vlog-2730) Undefined variable: 'VLR'.
+# End time: 18:03:43 on Jun 07,2023, Elapsed time: 0:00:00
+# Errors: 3, Warnings: 0
+# ** Error: C:/intelFPGA_lite/18.1/modelsim_ase/win32aloem/vlog failed.
+# Error in macro ./ponteh_run_msim_rtl_verilog.do line 10
+# C:/intelFPGA_lite/18.1/modelsim_ase/win32aloem/vlog failed.
+#     while executing
+# "vlog -vlog01compat -work work +incdir+C:/Users/gev/Downloads/ponteh {C:/Users/gev/Downloads/ponteh/ponteh_tb.v}"
+# Load canceled

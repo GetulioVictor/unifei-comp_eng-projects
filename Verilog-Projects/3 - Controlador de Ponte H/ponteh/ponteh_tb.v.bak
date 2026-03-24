@@ -1,0 +1,58 @@
+module ponteh_tb();
+
+	reg CLK, FR;
+	reg [1:0] RGT, [1:0] VLR;
+
+	wire SA, SH;
+
+
+	initial
+	begin
+		#10000000
+	end
+	
+	//CLK
+	initial
+	begin
+	
+		
+	end
+	
+	
+	//FR
+	initial
+	begin
+		FR = 1'b0;
+		FR = #5000 1'b1;
+		#5000;	
+	end
+	
+	//RGT[1]
+	initial
+	begin
+	
+		
+	end
+	
+	//RGT[0]
+	initial
+	begin
+	
+		
+	end
+	
+	//VLR[1]
+	initial
+	begin
+	
+		
+	end
+	
+	//VLR[0]
+	initial
+	begin
+	
+		
+	end
+	
+endmodule 

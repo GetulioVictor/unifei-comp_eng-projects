@@ -1,0 +1,41 @@
+{
+	"partitions" : [
+		{
+			"name" : "Top",
+			"pins" : [
+				{
+					"name" : "SA",
+					"strict" : false
+				},
+				{
+					"name" : "SH",
+					"strict" : false
+				},
+				{
+					"name" : "VLR[0]",
+					"strict" : false
+				},
+				{
+					"name" : "CLK",
+					"strict" : false
+				},
+				{
+					"name" : "RGT[0]",
+					"strict" : false
+				},
+				{
+					"name" : "RGT[1]",
+					"strict" : false
+				},
+				{
+					"name" : "VLR[1]",
+					"strict" : false
+				},
+				{
+					"name" : "FR",
+					"strict" : false
+				}
+			]
+		}
+	]
+}

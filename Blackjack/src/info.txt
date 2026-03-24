@@ -1,0 +1,6 @@
+Jogador 1: u
+Pontuação jogador 1: 0
+
+Jogador 2: i
+Pontuação jogador 2: 0
+

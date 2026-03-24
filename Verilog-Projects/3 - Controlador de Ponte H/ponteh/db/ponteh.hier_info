@@ -1,0 +1,56 @@
+|ponteh
+CLK => CMO[0].CLK
+CLK => CMO[1].CLK
+CLK => DIV[0].CLK
+CLK => DIV[1].CLK
+CLK => OPE[0].CLK
+CLK => OPE[1].CLK
+RGT[0] => Equal0.IN1
+RGT[0] => Equal1.IN0
+RGT[0] => Equal2.IN1
+RGT[1] => Equal0.IN0
+RGT[1] => Equal1.IN1
+RGT[1] => Equal2.IN0
+VLR[0] => CMO.DATAB
+VLR[0] => DIV.DATAB
+VLR[0] => OPE.DATAB
+VLR[1] => CMO.DATAB
+VLR[1] => DIV.DATAB
+VLR[1] => OPE.DATAB
+FR => FR.IN1
+SA <= saidas:mod3.port3
+SH <= saidas:mod3.port4
+
+
+|ponteh|divisor:mod1
+DIV[0] => Mux0.IN1
+DIV[1] => Mux0.IN0
+FR => Mux0.IN2
+FR => fr2.CLK
+Fo <= Mux0.DB_MAX_OUTPUT_PORT_TYPE
+
+
+|ponteh|modulacao:mod2
+Fo => am75.CLK
+Fo => am50.CLK
+Fo => am25.CLK
+Fo => count[0].CLK
+Fo => count[1].CLK
+CMO[0] => Mux0.IN2
+CMO[1] => Mux0.IN1
+Am <= Mux0.DB_MAX_OUTPUT_PORT_TYPE
+
+
+|ponteh|saidas:mod3
+Am => SA.DATAB
+Am => SH.DATAB
+Fo => SH~reg0.CLK
+Fo => SA~reg0.CLK
+OPE[0] => Equal0.IN3
+OPE[0] => Equal1.IN3
+OPE[1] => Equal0.IN2
+OPE[1] => Equal1.IN2
+SA <= SA~reg0.DB_MAX_OUTPUT_PORT_TYPE
+SH <= SH~reg0.DB_MAX_OUTPUT_PORT_TYPE
+
+

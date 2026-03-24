@@ -1,0 +1,64 @@
+/*
+Discente: Getúlio Victor Faustino Moreira
+Disciplina: ELTD12A - Eletrônica Digital II
+Projeto: Controlador Ponte H
+*/
+
+/*
+-------------Requisitos--------------
+
+1) Registros de Operação
+	- OPE (Operação)
+	- DIV (Divisor de Frequência)
+	- CMO (Modulação)
+2) Divisor de Frequência
+3) Modulação
+4) Geração das Saídas
+*/
+
+/*
+-------Observações-------------------
+ Divisor de Frequência
+	Entradas: FR e DIV
+	Saída: Fo
+ Modulação
+ 	Entradas: Fo e CMO
+ 	Saída: Am
+ Geração das Saídas
+ 	Entradas: Am, Fo e OPE
+ 	Saídas: SA e SH
+*/
+
+module ponteh();
+
+	input CLK; // Sinal de sincronismo para se configurar a operação do circuito
+	input [2:0] RGT; //Sinal de especificação de registro de operação do circuito
+	input [2:0] VLR; //Sinal de especificação de valor de registro de operação do circuito
+	input FR; //Sinal de sincronismo de referência para a acionamentos das saídas
+	output SA; //Controle dos pares de saída que geram rotação no sentido anti-horário
+	output SH; //Controle dos pares de saída que geram rotação no sentido horário
+	
+	//initial
+	
+	//-------Registros---------
+	//OPE
+	/* 00 - off | 01 - (Par SE-ID (SA)) | 10 - (Par SD-IE(SH)) | 11 - Reservado*/
+	
+	
+	//DIV
+	/* 00 - FR | 01 - FR/2 | 10 - FR/4 | 11 - FR/8*/
+	
+	
+	//CMO
+	/*00 - 25% | 01 - 50% | 10 - 75% | 11 - 100%*/
+
+	//-------Divisor de Frequência-----
+	// 3 -  negedge FFJK (ou D)  --- Mux 
+	
+	//--------Modulação----------------
+	//Contador e Comparador de 2 bits (Igual ou Menor)
+	
+	//--------Geração das Saídas-------
+	
+	
+endmodule
