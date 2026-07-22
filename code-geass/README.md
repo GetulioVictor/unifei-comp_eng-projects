@@ -87,8 +87,4 @@ mvn exec:java -Dexec.mainClass="br.unifei.edu.ecot12a.codegeass.Main"
 
 ## Diagram
 
-The UML class diagram is available in geass.dia (open with Dia Diagram Editor: http://dia-installer.de/).
-
-## Course
-
-ECOT12A — UNIFEI
+The UML class diagram is available in geass.dia (open with Dia Diagram Editor)
