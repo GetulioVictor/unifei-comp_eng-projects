@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Login | Laboratório nginx + WAF</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="/static/login.js" defer></script>
+</head>
+<body>
+  <main class="card">
+    <h1>Acesso ao sistema</h1>
+    <p class="sub">Laboratório de Sistemas Distribuídos: nginx + WAF</p>
+
+    <form id="form-login" autocomplete="off">
+      <label for="username">Usuário</label>
+      <input id="username" name="username" type="text" required>
+
+      <label for="password">Senha</label>
+      <input id="password" name="password" type="text" required>
+
+      <button type="submit" class="primario">Entrar</button>
+    </form>
+
+    <div id="mensagem" class="mensagem oculto" role="status" aria-live="polite"></div>
+
+    <section>
+      <h2>Preencher com exemplos</h2>
+      <div class="botoes">
+        <button type="button" data-exemplo="valido">Credenciais válidas</button>
+        <button type="button" data-exemplo="errado">Senha errada</button>
+        <button type="button" data-exemplo="sqli">SQL Injection</button>
+        <button type="button" data-exemplo="xss">XSS</button>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

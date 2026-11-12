@@ -1,0 +1,313 @@
+gpasm-1.4.2 #1169 (Jan  2 2016) build/default   4-2-2018  11:19:06          PAGE  1
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+                      00001 ;--------------------------------------------------------
+                      00002 ; File Created by SDCC : free open source ANSI-C Compiler
+                      00003 ; Version 3.6.0 #9615 (MINGW64)
+                      00004 ;--------------------------------------------------------
+                      00005 ; PIC16 port for the Microchip 16-bit core micros
+                      00006 ;--------------------------------------------------------
+                      00007         list    p=18f4520
+                      00008         radix   dec
+                      00009         CONFIG  MCLRE=ON
+                      00010         CONFIG  OSC=HS
+                      00011         CONFIG  WDT=OFF
+                      00012         CONFIG  LVP=OFF
+                      00013         CONFIG  DEBUG=OFF
+                      00014         CONFIG  WDTPS=1
+                      00015         CONFIG  XINST=OFF
+                      00016 
+                      00017 
+                      00018 ;--------------------------------------------------------
+                      00019 ; public variables in this module
+                      00020 ;--------------------------------------------------------
+  0000                00021         global  _ISR
+  0000                00022         global  _t1
+  0000                00023         global  _main
+                      00024 
+                      00025 ;--------------------------------------------------------
+                      00026 ; extern variables in this module
+                      00027 ;--------------------------------------------------------
+  0000                00028         extern  _kernelInit
+  0000                00029         extern  _kernelAddProc
+  0000                00030         extern  _kernelLoop
+  0000                00031         extern  _KernelClock
+  0000                00032         extern  _timerInit
+                      00033 
+                      00034 ;--------------------------------------------------------
+                      00035 ;       Equates to used internal registers
+                      00036 ;--------------------------------------------------------
+  00000FD8            00037 STATUS  equ     0xfd8
+  00000FFA            00038 PCLATH  equ     0xffa
+  00000FFB            00039 PCLATU  equ     0xffb
+  00000FE8            00040 WREG    equ     0xfe8
+  00000FE0            00041 BSR     equ     0xfe0
+  00000FE9            00042 FSR0L   equ     0xfe9
+  00000FEA            00043 FSR0H   equ     0xfea
+  00000FE1            00044 FSR1L   equ     0xfe1
+  00000FD9            00045 FSR2L   equ     0xfd9
+  00000FEF            00046 INDF0   equ     0xfef
+  00000FE5            00047 POSTDEC1        equ     0xfe5
+  00000FE4            00048 PREINC1 equ     0xfe4
+  00000FF3            00049 PRODL   equ     0xff3
+  00000FF4            00050 PRODH   equ     0xff4
+                      00051 
+                      00052 
+                      00053 ; Internal registers
+gpasm-1.4.2 #1169 (Jan  2 2016) build/default   4-2-2018  11:19:06          PAGE  2
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+                      00054 .registers      udata_ovr       0x0000
+000000                00055 r0x00   res     1
+000001                00056 r0x01   res     1
+000002                00057 r0x02   res     1
+                      00058 
+                      00059 udata_main_0    udata
+000000                00060 _main_p1_1_16   res     7
+                      00061 
+                      00062 ;--------------------------------------------------------
+                      00063 ; interrupt vector
+                      00064 ;--------------------------------------------------------
+                      00065 
+                      00066 ;--------------------------------------------------------
+                      00067 ; global & static initialisations
+                      00068 ;--------------------------------------------------------
+                      00069 ; ; Starting pCode block for absolute section
+                      00070 ; ;-----------------------------------------
+                      00071 S_main_ivec_0x1_ISR     code    0X000008
+000008                00072 ivec_0x1_ISR:
+000008 EF00 F000      00073         GOTO    _ISR
+                      00074 
+                      00075 ; I code from now on!
+                      00076 ; ; Starting pCode block
+                      00077 S_main__main    code
+000000                00078 _main:
+                      00079 ;       .line   29; main.c      process p1 = {t1, 100, 0};
+000000 0E??           00080         MOVLW   LOW(_t1)
+000002 ????           00081         BANKSEL _main_p1_1_16
+000004 6F??           00082         MOVWF   _main_p1_1_16, B
+000006 0E??           00083         MOVLW   HIGH(_t1)
+000008 ????           00084         BANKSEL (_main_p1_1_16 + 1)
+00000A 6F??           00085         MOVWF   (_main_p1_1_16 + 1), B
+00000C 0E??           00086         MOVLW   UPPER(_t1)
+00000E ????           00087         BANKSEL (_main_p1_1_16 + 2)
+000010 6F??           00088         MOVWF   (_main_p1_1_16 + 2), B
+000012 0E64           00089         MOVLW   0x64
+000014 ????           00090         BANKSEL (_main_p1_1_16 + 3)
+000016 6F??           00091         MOVWF   (_main_p1_1_16 + 3), B
+000018 ????           00092         BANKSEL (_main_p1_1_16 + 4)
+00001A 6B??           00093         CLRF    (_main_p1_1_16 + 4), B
+00001C ????           00094         BANKSEL (_main_p1_1_16 + 5)
+00001E 6B??           00095         CLRF    (_main_p1_1_16 + 5), B
+000020 ????           00096         BANKSEL (_main_p1_1_16 + 6)
+000022 6B??           00097         CLRF    (_main_p1_1_16 + 6), B
+                      00098 ;       .line   30; main.c      TRISD = 0x00;
+000024 EE0F F095      00099         LFSR    0x00, 0xf95
+000028 0E00           00100         MOVLW   0x00
+00002A 6EEF           00101         MOVWF   INDF0
+                      00102 ;       .line   31; main.c      timerInit();
+00002C EC?? F0??      00103         CALL    _timerInit
+                      00104 ;       .line   35; main.c      kernelInit();
+000030 EC?? F0??      00105         CALL    _kernelInit
+                      00106 ;       .line   36; main.c      kernelAddProc(&p1);
+gpasm-1.4.2 #1169 (Jan  2 2016) build/default   4-2-2018  11:19:06          PAGE  3
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+000034 0E??           00107         MOVLW   HIGH(_main_p1_1_16)
+000036 6E??           00108         MOVWF   r0x01
+000038 0E??           00109         MOVLW   LOW(_main_p1_1_16)
+00003A 6E??           00110         MOVWF   r0x00
+00003C 0E80           00111         MOVLW   0x80
+00003E 6E??           00112         MOVWF   r0x02
+000040 50??           00113         MOVF    r0x02, W
+000042 6EE5           00114         MOVWF   POSTDEC1
+000044 50??           00115         MOVF    r0x01, W
+000046 6EE5           00116         MOVWF   POSTDEC1
+000048 50??           00117         MOVF    r0x00, W
+00004A 6EE5           00118         MOVWF   POSTDEC1
+00004C EC?? F0??      00119         CALL    _kernelAddProc
+000050 0E03           00120         MOVLW   0x03
+000052 26E1           00121         ADDWF   FSR1L, F
+                      00122 ;       .line   40; main.c      BitClr(RCON, 7); // desabilita IPEN ( modo de compatibilidade )
+000054 EE0F F0D0      00123         LFSR    0x00, 0xfd0
+000058 CFEF F000      00124         MOVFF   INDF0, r0x00
+00005C 9E??           00125         BCF     r0x00, 7
+00005E EE0F F0D0      00126         LFSR    0x00, 0xfd0
+000062 C??? F???      00127         MOVFF   r0x00, INDF0
+                      00128 ;       .line   41; main.c      BitSet(INTCON, 5); // liga a interrupção para o timer 0
+000066 EE0F F0F2      00129         LFSR    0x00, 0xff2
+00006A CFEF F000      00130         MOVFF   INDF0, r0x00
+00006E 8A??           00131         BSF     r0x00, 5
+000070 EE0F F0F2      00132         LFSR    0x00, 0xff2
+000074 C??? F???      00133         MOVFF   r0x00, INDF0
+                      00134 ;       .line   42; main.c      BitSet(INTCON, 7); // habilita todas as interrupções globais
+000078 EE0F F0F2      00135         LFSR    0x00, 0xff2
+00007C CFEF F000      00136         MOVFF   INDF0, r0x00
+000080 8E??           00137         BSF     r0x00, 7
+000082 EE0F F0F2      00138         LFSR    0x00, 0xff2
+000086 C??? F???      00139         MOVFF   r0x00, INDF0
+                      00140 ;       .line   43; main.c      BitSet(INTCON, 6); // habilita todas as interrupções de perifericos
+00008A EE0F F0F2      00141         LFSR    0x00, 0xff2
+00008E CFEF F000      00142         MOVFF   INDF0, r0x00
+000092 8C??           00143         BSF     r0x00, 6
+000094 EE0F F0F2      00144         LFSR    0x00, 0xff2
+000098 C??? F???      00145         MOVFF   r0x00, INDF0
+                      00146 ;       .line   46; main.c      kernelLoop();
+00009C EC?? F0??      00147         CALL    _kernelLoop
+0000A0 0012           00148         RETURN  
+                      00149 
+                      00150 ; ; Starting pCode block
+                      00151 S_main__t1      code
+000000                00152 _t1:
+                      00153 ;       .line   23; main.c      char t1(void) {
+000000 CFD9 FFE5      00154         MOVFF   FSR2L, POSTDEC1
+000004 CFE1 FFD9      00155         MOVFF   FSR1L, FSR2L
+000008 C??? F???      00156         MOVFF   r0x00, POSTDEC1
+                      00157 ;       .line   24; main.c      PORTD = PORTD + 1;
+00000C EE0F F083      00158         LFSR    0x00, 0xf83
+000010 CFEF F000      00159         MOVFF   INDF0, r0x00
+gpasm-1.4.2 #1169 (Jan  2 2016) build/default   4-2-2018  11:19:06          PAGE  4
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+000014 2A??           00160         INCF    r0x00, F
+000016 EE0F F083      00161         LFSR    0x00, 0xf83
+00001A C??? F???      00162         MOVFF   r0x00, INDF0
+                      00163 ;       .line   25; main.c      return REPEAT;
+00001E 0E02           00164         MOVLW   0x02
+000020 CFE4 F000      00165         MOVFF   PREINC1, r0x00
+000024 CFE4 FFD9      00166         MOVFF   PREINC1, FSR2L
+000028 0012           00167         RETURN  
+                      00168 
+                      00169 ; ; Starting pCode block
+                      00170 S_main__ISR     code
+000000                00171 _ISR:
+                      00172 ;       .line   9; main.c       void ISR(void) __interrupt 1 {
+000000 CFD8 FFE5      00173         MOVFF   STATUS, POSTDEC1
+000004 CFE0 FFE5      00174         MOVFF   BSR, POSTDEC1
+000008 6EE5           00175         MOVWF   POSTDEC1
+00000A CFF3 FFE5      00176         MOVFF   PRODL, POSTDEC1
+00000E CFF4 FFE5      00177         MOVFF   PRODH, POSTDEC1
+000012 CFE9 FFE5      00178         MOVFF   FSR0L, POSTDEC1
+000016 CFEA FFE5      00179         MOVFF   FSR0H, POSTDEC1
+00001A CFFA FFE5      00180         MOVFF   PCLATH, POSTDEC1
+00001E CFFB FFE5      00181         MOVFF   PCLATU, POSTDEC1
+000022 CFD9 FFE5      00182         MOVFF   FSR2L, POSTDEC1
+000026 CFE1 FFD9      00183         MOVFF   FSR1L, FSR2L
+00002A C??? F???      00184         MOVFF   r0x00, POSTDEC1
+                      00185 ;       .line   11; main.c      if (BitTst(INTCON, 2)) {
+00002E EE0F F0F2      00186         LFSR    0x00, 0xff2
+000032 CFEF F000      00187         MOVFF   INDF0, r0x00
+000036 A4??           00188         BTFSS   r0x00, 2
+000038 D???           00189         BRA     _00107_DS_
+                      00190 ;       .line   13; main.c      TMR0H = (45535 >> 8);
+00003A EE0F F0D7      00191         LFSR    0x00, 0xfd7
+00003E 0EB1           00192         MOVLW   0xb1
+000040 6EEF           00193         MOVWF   INDF0
+                      00194 ;       .line   14; main.c      TMR0L = (45535 & 0x00FF);
+000042 EE0F F0D6      00195         LFSR    0x00, 0xfd6
+000046 0EDF           00196         MOVLW   0xdf
+000048 6EEF           00197         MOVWF   INDF0
+                      00198 ;       .line   16; main.c      KernelClock();
+00004A EC?? F0??      00199         CALL    _KernelClock
+                      00200 ;       .line   19; main.c      BitClr(INTCON, 2);
+00004E EE0F F0F2      00201         LFSR    0x00, 0xff2
+000052 CFEF F000      00202         MOVFF   INDF0, r0x00
+000056 94??           00203         BCF     r0x00, 2
+000058 EE0F F0F2      00204         LFSR    0x00, 0xff2
+00005C C??? F???      00205         MOVFF   r0x00, INDF0
+000060                00206 _00107_DS_:
+000060 CFE4 F000      00207         MOVFF   PREINC1, r0x00
+000064 CFE4 FFD9      00208         MOVFF   PREINC1, FSR2L
+000068 CFE4 FFFB      00209         MOVFF   PREINC1, PCLATU
+00006C CFE4 FFFA      00210         MOVFF   PREINC1, PCLATH
+000070 CFE4 FFEA      00211         MOVFF   PREINC1, FSR0H
+000074 CFE4 FFE9      00212         MOVFF   PREINC1, FSR0L
+gpasm-1.4.2 #1169 (Jan  2 2016) build/default   4-2-2018  11:19:06          PAGE  5
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+000078 CFE4 FFF4      00213         MOVFF   PREINC1, PRODH
+00007C CFE4 FFF3      00214         MOVFF   PREINC1, PRODL
+000080 50E4           00215         MOVF    PREINC1, W
+000082 CFE4 FFE0      00216         MOVFF   PREINC1, BSR
+000086 CFE4 FFD8      00217         MOVFF   PREINC1, STATUS
+00008A 0010           00218         RETFIE  
+                      00219 
+                      00220 
+                      00221 
+                      00222 ; Statistics:
+                      00223 ; code size:      346 (0x015a) bytes ( 0.26%)
+                      00224 ;                 173 (0x00ad) words
+                      00225 ; udata size:       7 (0x0007) bytes ( 0.55%)
+                      00226 ; access size:      3 (0x0003) bytes
+                      00227 
+                      00228 
+                      00229         end
+gpasm-1.4.2 #1169 (Jan  2 2016) build/default   4-2-2018  11:19:06          PAGE  6
+
+
+SYMBOL TABLE
+  LABEL                             VALUE
+
+BSR                               00000FE0
+FSR0H                             00000FEA
+FSR0L                             00000FE9
+FSR1L                             00000FE1
+FSR2L                             00000FD9
+INDF0                             00000FEF
+PCLATH                            00000FFA
+PCLATU                            00000FFB
+POSTDEC1                          00000FE5
+PREINC1                           00000FE4
+PRODH                             00000FF4
+PRODL                             00000FF3
+STATUS                            00000FD8
+WREG                              00000FE8
+_00107_DS_                        00000060
+_ISR                              00000000
+_KernelClock                      00000000
+__18F4520                         00000001
+__ACC_RAM_LOW_END                 0000007F
+__ACC_RAM_LOW_START               00000000
+__CODE_END                        00007FFF
+__CODE_START                      00000000
+__CONFIG_END                      0030000D
+__CONFIG_START                    00300000
+__EEPROM_END                      00F000FF
+__EEPROM_START                    00F00000
+__IDLOCS_END                      00200007
+__IDLOCS_START                    00200000
+__VECTOR_INT_HIGH                 00000008
+__VECTOR_INT_LOW                  00000018
+__VECTOR_RESET                    00000000
+_kernelAddProc                    00000000
+_kernelInit                       00000000
+_kernelLoop                       00000000
+_main                             00000000
+_main_p1_1_16                     00000000
+_t1                               00000000
+_timerInit                        00000000
+ivec_0x1_ISR                      00000008
+r0x00                             00000000
+r0x01                             00000001
+r0x02                             00000002
+
+Errors   :     0
+Warnings :     0 reported,     0 suppressed
+Messages :     0 reported,     0 suppressed
+
+

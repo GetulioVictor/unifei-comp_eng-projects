@@ -1,0 +1,142 @@
+x-app-env: &app-env
+  REDIS_HOST: redis
+  REDIS_PASSWORD: ${REDIS_PASSWORD}
+  APP_SQL_SEGURO: ${APP_SQL_SEGURO:-false}
+
+x-app: &app
+  build: ./app
+  image: sd-app:latest
+  restart: unless-stopped
+  networks: [backend]
+  depends_on:
+    redis:
+      condition: service_healthy
+  read_only: true
+  tmpfs: [/tmp]
+  cap_drop: [ALL]
+  security_opt: ["no-new-privileges:true"]
+  healthcheck:
+    test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:5000/health', timeout=2)"]
+    interval: 5s
+    timeout: 3s
+    retries: 5
+
+services:
+  redis:
+    image: redis:7.4-alpine
+    container_name: redis
+    command: ["redis-server", "--requirepass", "${REDIS_PASSWORD}", "--save", "", "--appendonly", "no"]
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+    networks: [backend]
+    security_opt: ["no-new-privileges:true"]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a \"$$REDIS_PASSWORD\" --no-auth-warning ping | grep -q PONG"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  app1:
+    <<: *app
+    container_name: app1
+    environment:
+      <<: *app-env
+      INSTANCE_NAME: app1
+
+  app2:
+    <<: *app
+    container_name: app2
+    environment:
+      <<: *app-env
+      INSTANCE_NAME: app2
+
+  app3:
+    <<: *app
+    container_name: app3
+    environment:
+      <<: *app-env
+      INSTANCE_NAME: app3
+
+  # Balanceador de carga: distribuicao, failover, rate limit, headers de seguranca
+  lb:
+    image: nginx:1.27-alpine
+    container_name: lb
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/snippets:/etc/nginx/snippets:ro
+    networks: [frontend, backend]
+    security_opt: ["no-new-privileges:true"]
+    depends_on:
+      app1: { condition: service_healthy }
+      app2: { condition: service_healthy }
+      app3: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1/lb-status"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+
+  # WAF: nginx + ModSecurity v3 + OWASP Core Rule Set
+  waf:
+    image: owasp/modsecurity-crs:nginx-alpine
+    container_name: waf
+    networks: [frontend]
+    ports:
+      - "2222:2222"
+    volumes:
+      - ./waf/REQUEST-900-EXCLUSION-RULES-BEFORE-CRS.conf:/etc/modsecurity.d/owasp-crs/rules/REQUEST-900-EXCLUSION-RULES-BEFORE-CRS.conf:ro
+      - ./waf/RESPONSE-999-EXCLUSION-RULES-AFTER-CRS.conf:/etc/modsecurity.d/owasp-crs/rules/RESPONSE-999-EXCLUSION-RULES-AFTER-CRS.conf:ro
+    environment:
+      # --- Proxy ---
+      BACKEND: http://lb:80
+      SERVER_NAME: localhost
+      PORT: "2222"
+      PROXY_TIMEOUT: 30s
+
+      # --- Motor do ModSecurity (controlado pelo .env) ---
+      MODSEC_RULE_ENGINE: ${WAF_MODE:-On}
+      BLOCKING_PARANOIA: ${WAF_PARANOIA:-1}
+      DETECTION_PARANOIA: ${WAF_PARANOIA:-1}
+      ANOMALY_INBOUND: ${WAF_ANOMALY_INBOUND:-5}
+      ANOMALY_OUTBOUND: "4"
+
+      # --- Politica de protocolo ---
+      ALLOWED_METHODS: "GET HEAD POST"
+      ALLOWED_HTTP_VERSIONS: "HTTP/1.1 HTTP/2 HTTP/2.0"
+      ALLOWED_REQUEST_CONTENT_TYPE: "|application/x-www-form-urlencoded| |multipart/form-data| |application/json|"
+      ENFORCE_BODYPROC_URLENCODED: "1"
+      VALIDATE_UTF8_ENCODING: "1"
+
+      # --- Limites de argumentos e tamanho ---
+      MAX_NUM_ARGS: "20"
+      ARG_NAME_LENGTH: "50"
+      ARG_LENGTH: "500"
+      TOTAL_ARG_LENGTH: "2000"
+      MAX_FILE_SIZE: "1048576"
+      COMBINED_FILE_SIZES: "2097152"
+      MODSEC_REQ_BODY_LIMIT: "1048576"
+      MODSEC_REQ_BODY_NOFILES_LIMIT: "65536"
+
+      # --- Inspecao de respostas (vazamento de dados) ---
+      MODSEC_RESP_BODY_ACCESS: "On"
+      MODSEC_RESP_BODY_MIMETYPE: "text/plain text/html text/xml application/json"
+
+      # --- Logs de auditoria em JSON ---
+      MODSEC_AUDIT_ENGINE: RelevantOnly
+      MODSEC_AUDIT_LOG_FORMAT: JSON
+
+      # --- Endurecimento do nginx do WAF ---
+      SERVER_TOKENS: "off"
+      SERVER_HEADER: ""
+      CLIENT_BODY_TIMEOUT: 10s
+      KEEPALIVE_TIMEOUT: 15s
+    depends_on:
+      lb: { condition: service_healthy }
+    restart: unless-stopped
+
+networks:
+  frontend:
+  backend:
+    internal: true   # replicas e Redis sem acesso externo

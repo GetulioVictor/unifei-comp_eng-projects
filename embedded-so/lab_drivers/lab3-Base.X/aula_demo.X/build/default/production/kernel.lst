@@ -1,0 +1,830 @@
+gpasm-1.4.2 #1169 (Jan  2 2016) build/default   4-2-2018  11:14:55          PAGE  1
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+                      00001 ;--------------------------------------------------------
+                      00002 ; File Created by SDCC : free open source ANSI-C Compiler
+                      00003 ; Version 3.6.0 #9615 (MINGW64)
+                      00004 ;--------------------------------------------------------
+                      00005 ; PIC16 port for the Microchip 16-bit core micros
+                      00006 ;--------------------------------------------------------
+                      00007         list    p=18f4520
+                      00008         radix   dec
+                      00009 
+                      00010 
+                      00011 ;--------------------------------------------------------
+                      00012 ; public variables in this module
+                      00013 ;--------------------------------------------------------
+  0000                00014         global  _kernelInit
+  0000                00015         global  _kernelAddProc
+  0000                00016         global  _kernelLoop
+  0000                00017         global  _KernelClock
+  0000                00018         global  _pool
+  0000                00019         global  _start
+  0000                00020         global  _end
+                      00021 
+                      00022 ;--------------------------------------------------------
+                      00023 ; extern variables in this module
+                      00024 ;--------------------------------------------------------
+  0000                00025         extern  __gptrget2
+  0000                00026         extern  __gptrput2
+  0000                00027         extern  __gptrget3
+  0000                00028         extern  __modsint
+                      00029 
+                      00030 ;--------------------------------------------------------
+                      00031 ;       Equates to used internal registers
+                      00032 ;--------------------------------------------------------
+  00000FD8            00033 STATUS  equ     0xfd8
+  00000FF9            00034 PCL     equ     0xff9
+  00000FFA            00035 PCLATH  equ     0xffa
+  00000FFB            00036 PCLATU  equ     0xffb
+  00000FF2            00037 INTCON  equ     0xff2
+  00000FE8            00038 WREG    equ     0xfe8
+  00000FFD            00039 TOSL    equ     0xffd
+  00000FFE            00040 TOSH    equ     0xffe
+  00000FFF            00041 TOSU    equ     0xfff
+  00000FE9            00042 FSR0L   equ     0xfe9
+  00000FEA            00043 FSR0H   equ     0xfea
+  00000FE1            00044 FSR1L   equ     0xfe1
+  00000FD9            00045 FSR2L   equ     0xfd9
+  00000FEF            00046 INDF0   equ     0xfef
+  00000FEE            00047 POSTINC0        equ     0xfee
+  00000FE5            00048 POSTDEC1        equ     0xfe5
+  00000FE4            00049 PREINC1 equ     0xfe4
+  00000FDB            00050 PLUSW2  equ     0xfdb
+  00000FF3            00051 PRODL   equ     0xff3
+  00000FF4            00052 PRODH   equ     0xff4
+                      00053 
+gpasm-1.4.2 #1169 (Jan  2 2016) build/default   4-2-2018  11:14:55          PAGE  2
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+                      00054 
+                      00055 ; Internal registers
+                      00056 .registers      udata_ovr       0x0000
+000000                00057 r0x00   res     1
+000001                00058 r0x01   res     1
+000002                00059 r0x02   res     1
+000003                00060 r0x03   res     1
+000004                00061 r0x04   res     1
+000005                00062 r0x05   res     1
+000006                00063 r0x06   res     1
+000007                00064 r0x07   res     1
+                      00065 
+                      00066 udata_kernel_0  udata
+000000                00067 _start  res     1
+                      00068 
+                      00069 udata_kernel_1  udata
+000000                00070 _end    res     1
+                      00071 
+                      00072 udata_kernel_2  udata
+000000                00073 _pool   res     30
+                      00074 
+                      00075 ;--------------------------------------------------------
+                      00076 ; global & static initialisations
+                      00077 ;--------------------------------------------------------
+                      00078 ; I code from now on!
+                      00079 ; ; Starting pCode block
+                      00080 S_kernel__KernelClock   code
+000000                00081 _KernelClock:
+                      00082 ;       .line   57; kernel.c    void KernelClock(void) {
+000000 CFD9 FFE5      00083         MOVFF   FSR2L, POSTDEC1
+000004 CFE1 FFD9      00084         MOVFF   FSR1L, FSR2L
+000008 C??? F???      00085         MOVFF   r0x00, POSTDEC1
+00000C C??? F???      00086         MOVFF   r0x01, POSTDEC1
+000010 C??? F???      00087         MOVFF   r0x02, POSTDEC1
+000014 C??? F???      00088         MOVFF   r0x03, POSTDEC1
+000018 C??? F???      00089         MOVFF   r0x04, POSTDEC1
+00001C C??? F???      00090         MOVFF   r0x05, POSTDEC1
+                      00091 ;       .line   59; kernel.c    for (proc = start; proc != end; proc = (proc + 1) % POOLSIZE) {
+000020 C??? F???      00092         MOVFF   _start, r0x00
+000024                00093 _00182_DS_:
+000024 50??           00094         MOVF    r0x00, W
+000026 ????           00095         BANKSEL _end
+000028 19??           00096         XORWF   _end, W, B
+00002A E1??           00097         BNZ     _00196_DS_
+00002C D???           00098         BRA     _00184_DS_
+                      00099 ; ;multiply lit val:0x03 by variable r0x00 and store in r0x01
+00002E                00100 _00196_DS_:
+                      00101 ;       .line   60; kernel.c    if ((pool[proc]->start)>(MIN_INT)) {
+00002E 50??           00102         MOVF    r0x00, W
+000030 0D03           00103         MULLW   0x03
+000032 50F4           00104         MOVF    PRODH, W
+000034 6E??           00105         MOVWF   r0x02
+000036 CFF3 F000      00106         MOVFF   PRODL, r0x01
+gpasm-1.4.2 #1169 (Jan  2 2016) build/default   4-2-2018  11:14:55          PAGE  3
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+00003A 0E??           00107         MOVLW   LOW(_pool)
+00003C 26??           00108         ADDWF   r0x01, F
+00003E 0E??           00109         MOVLW   HIGH(_pool)
+000040 22??           00110         ADDWFC  r0x02, F
+000042 C??? F???      00111         MOVFF   r0x01, FSR0L
+000046 C??? F???      00112         MOVFF   r0x02, FSR0H
+00004A CFEE F000      00113         MOVFF   POSTINC0, r0x01
+00004E CFEE F000      00114         MOVFF   POSTINC0, r0x02
+000052 CFEF F000      00115         MOVFF   INDF0, r0x03
+000056 0E05           00116         MOVLW   0x05
+000058 26??           00117         ADDWF   r0x01, F
+00005A 0E00           00118         MOVLW   0x00
+00005C 22??           00119         ADDWFC  r0x02, F
+00005E 22??           00120         ADDWFC  r0x03, F
+000060 C??? F???      00121         MOVFF   r0x01, FSR0L
+000064 C??? F???      00122         MOVFF   r0x02, PRODL
+000068 50??           00123         MOVF    r0x03, W
+00006A EC?? F0??      00124         CALL    __gptrget2
+00006E 6E??           00125         MOVWF   r0x04
+000070 CFF3 F000      00126         MOVFF   PRODL, r0x05
+000074 50??           00127         MOVF    r0x05, W
+000076 0F80           00128         ADDLW   0x80
+000078 0FF6           00129         ADDLW   0xf6
+00007A E1??           00130         BNZ     _00197_DS_
+00007C 0ED1           00131         MOVLW   0xd1
+00007E 5C??           00132         SUBWF   r0x04, W
+000080                00133 _00197_DS_:
+000080 E3??           00134         BNC     _00183_DS_
+                      00135 ;       .line   61; kernel.c    pool[proc]->start--;
+000082 0EFF           00136         MOVLW   0xff
+000084 26??           00137         ADDWF   r0x04, F
+000086 22??           00138         ADDWFC  r0x05, F
+000088 C??? F???      00139         MOVFF   r0x04, POSTDEC1
+00008C C??? F???      00140         MOVFF   r0x05, PRODH
+000090 C??? F???      00141         MOVFF   r0x01, FSR0L
+000094 C??? F???      00142         MOVFF   r0x02, PRODL
+000098 50??           00143         MOVF    r0x03, W
+00009A EC?? F0??      00144         CALL    __gptrput2
+00009E                00145 _00183_DS_:
+                      00146 ;       .line   59; kernel.c    for (proc = start; proc != end; proc = (proc + 1) % POOLSIZE) {
+00009E C??? F???      00147         MOVFF   r0x00, r0x01
+0000A2 6A??           00148         CLRF    r0x02
+0000A4 4A??           00149         INFSNZ  r0x01, F
+0000A6 2A??           00150         INCF    r0x02, F
+0000A8 0E00           00151         MOVLW   0x00
+0000AA 6EE5           00152         MOVWF   POSTDEC1
+0000AC 0E0A           00153         MOVLW   0x0a
+0000AE 6EE5           00154         MOVWF   POSTDEC1
+0000B0 50??           00155         MOVF    r0x02, W
+0000B2 6EE5           00156         MOVWF   POSTDEC1
+0000B4 50??           00157         MOVF    r0x01, W
+0000B6 6EE5           00158         MOVWF   POSTDEC1
+0000B8 EC?? F0??      00159         CALL    __modsint
+gpasm-1.4.2 #1169 (Jan  2 2016) build/default   4-2-2018  11:14:55          PAGE  4
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+0000BC 6E??           00160         MOVWF   r0x01
+0000BE CFF3 F000      00161         MOVFF   PRODL, r0x02
+0000C2 0E04           00162         MOVLW   0x04
+0000C4 26E1           00163         ADDWF   FSR1L, F
+0000C6 50??           00164         MOVF    r0x01, W
+0000C8 6E??           00165         MOVWF   r0x00
+0000CA D???           00166         BRA     _00182_DS_
+0000CC                00167 _00184_DS_:
+0000CC CFE4 F000      00168         MOVFF   PREINC1, r0x05
+0000D0 CFE4 F000      00169         MOVFF   PREINC1, r0x04
+0000D4 CFE4 F000      00170         MOVFF   PREINC1, r0x03
+0000D8 CFE4 F000      00171         MOVFF   PREINC1, r0x02
+0000DC CFE4 F000      00172         MOVFF   PREINC1, r0x01
+0000E0 CFE4 F000      00173         MOVFF   PREINC1, r0x00
+0000E4 CFE4 FFD9      00174         MOVFF   PREINC1, FSR2L
+0000E8 0012           00175         RETURN  
+                      00176 
+                      00177 ; ; Starting pCode block
+                      00178 S_kernel__kernelLoop    code
+000000                00179 _kernelLoop:
+                      00180 ;       .line   24; kernel.c    void kernelLoop(void) {
+000000 CFD9 FFE5      00181         MOVFF   FSR2L, POSTDEC1
+000004 CFE1 FFD9      00182         MOVFF   FSR1L, FSR2L
+000008 C??? F???      00183         MOVFF   r0x00, POSTDEC1
+00000C C??? F???      00184         MOVFF   r0x01, POSTDEC1
+000010 C??? F???      00185         MOVFF   r0x02, POSTDEC1
+000014 C??? F???      00186         MOVFF   r0x03, POSTDEC1
+000018 C??? F???      00187         MOVFF   r0x04, POSTDEC1
+00001C C??? F???      00188         MOVFF   r0x05, POSTDEC1
+000020 C??? F???      00189         MOVFF   r0x06, POSTDEC1
+000024 C??? F???      00190         MOVFF   r0x07, POSTDEC1
+000028                00191 _00137_DS_:
+000028 ????           00192         BANKSEL _start
+                      00193 ;       .line   29; kernel.c    if (start != end) {
+00002A 51??           00194         MOVF    _start, W, B
+00002C ????           00195         BANKSEL _end
+00002E 19??           00196         XORWF   _end, W, B
+000030 E0??           00197         BZ      _00137_DS_
+                      00198 ;       .line   31; kernel.c    next = start;
+000032 C??? F???      00199         MOVFF   _start, r0x00
+                      00200 ;       .line   32; kernel.c    for (p = start; p != end; p = (p + 1) % POOLSIZE) {
+000036 C??? F???      00201         MOVFF   _start, r0x01
+00003A                00202 _00135_DS_:
+00003A 50??           00203         MOVF    r0x01, W
+00003C ????           00204         BANKSEL _end
+00003E 19??           00205         XORWF   _end, W, B
+000040 E1??           00206         BNZ     _00168_DS_
+000042 D???           00207         BRA     _00125_DS_
+                      00208 ; ;multiply lit val:0x03 by variable r0x01 and store in r0x02
+000044                00209 _00168_DS_:
+                      00210 ;       .line   33; kernel.c    if (pool[p]->start < pool[next]->start) {
+000044 50??           00211         MOVF    r0x01, W
+000046 0D03           00212         MULLW   0x03
+gpasm-1.4.2 #1169 (Jan  2 2016) build/default   4-2-2018  11:14:55          PAGE  5
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+000048 50F4           00213         MOVF    PRODH, W
+00004A 6E??           00214         MOVWF   r0x03
+00004C CFF3 F000      00215         MOVFF   PRODL, r0x02
+000050 0E??           00216         MOVLW   LOW(_pool)
+000052 26??           00217         ADDWF   r0x02, F
+000054 0E??           00218         MOVLW   HIGH(_pool)
+000056 22??           00219         ADDWFC  r0x03, F
+000058 C??? F???      00220         MOVFF   r0x02, FSR0L
+00005C C??? F???      00221         MOVFF   r0x03, FSR0H
+000060 CFEE F000      00222         MOVFF   POSTINC0, r0x02
+000064 CFEE F000      00223         MOVFF   POSTINC0, r0x03
+000068 CFEF F000      00224         MOVFF   INDF0, r0x04
+00006C 0E05           00225         MOVLW   0x05
+00006E 26??           00226         ADDWF   r0x02, F
+000070 0E00           00227         MOVLW   0x00
+000072 22??           00228         ADDWFC  r0x03, F
+000074 22??           00229         ADDWFC  r0x04, F
+000076 C??? F???      00230         MOVFF   r0x02, FSR0L
+00007A C??? F???      00231         MOVFF   r0x03, PRODL
+00007E 50??           00232         MOVF    r0x04, W
+000080 EC?? F0??      00233         CALL    __gptrget2
+000084 6E??           00234         MOVWF   r0x02
+000086 CFF3 F000      00235         MOVFF   PRODL, r0x03
+                      00236 ; ;multiply lit val:0x03 by variable r0x00 and store in r0x04
+00008A 50??           00237         MOVF    r0x00, W
+00008C 0D03           00238         MULLW   0x03
+00008E 50F4           00239         MOVF    PRODH, W
+000090 6E??           00240         MOVWF   r0x05
+000092 CFF3 F000      00241         MOVFF   PRODL, r0x04
+000096 0E??           00242         MOVLW   LOW(_pool)
+000098 26??           00243         ADDWF   r0x04, F
+00009A 0E??           00244         MOVLW   HIGH(_pool)
+00009C 22??           00245         ADDWFC  r0x05, F
+00009E C??? F???      00246         MOVFF   r0x04, FSR0L
+0000A2 C??? F???      00247         MOVFF   r0x05, FSR0H
+0000A6 CFEE F000      00248         MOVFF   POSTINC0, r0x04
+0000AA CFEE F000      00249         MOVFF   POSTINC0, r0x05
+0000AE CFEF F000      00250         MOVFF   INDF0, r0x06
+0000B2 0E05           00251         MOVLW   0x05
+0000B4 26??           00252         ADDWF   r0x04, F
+0000B6 0E00           00253         MOVLW   0x00
+0000B8 22??           00254         ADDWFC  r0x05, F
+0000BA 22??           00255         ADDWFC  r0x06, F
+0000BC C??? F???      00256         MOVFF   r0x04, FSR0L
+0000C0 C??? F???      00257         MOVFF   r0x05, PRODL
+0000C4 50??           00258         MOVF    r0x06, W
+0000C6 EC?? F0??      00259         CALL    __gptrget2
+0000CA 6E??           00260         MOVWF   r0x04
+0000CC CFF3 F000      00261         MOVFF   PRODL, r0x05
+0000D0 50??           00262         MOVF    r0x03, W
+0000D2 0F80           00263         ADDLW   0x80
+0000D4 6EF3           00264         MOVWF   PRODL
+0000D6 50??           00265         MOVF    r0x05, W
+gpasm-1.4.2 #1169 (Jan  2 2016) build/default   4-2-2018  11:14:55          PAGE  6
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+0000D8 0F80           00266         ADDLW   0x80
+0000DA 5CF3           00267         SUBWF   PRODL, W
+0000DC E1??           00268         BNZ     _00169_DS_
+0000DE 50??           00269         MOVF    r0x04, W
+0000E0 5C??           00270         SUBWF   r0x02, W
+0000E2                00271 _00169_DS_:
+0000E2 E2??           00272         BC      _00136_DS_
+                      00273 ;       .line   34; kernel.c    next = p;
+0000E4 C??? F???      00274         MOVFF   r0x01, r0x00
+0000E8                00275 _00136_DS_:
+                      00276 ;       .line   32; kernel.c    for (p = start; p != end; p = (p + 1) % POOLSIZE) {
+0000E8 C??? F???      00277         MOVFF   r0x01, r0x02
+0000EC 6A??           00278         CLRF    r0x03
+0000EE 4A??           00279         INFSNZ  r0x02, F
+0000F0 2A??           00280         INCF    r0x03, F
+0000F2 0E00           00281         MOVLW   0x00
+0000F4 6EE5           00282         MOVWF   POSTDEC1
+0000F6 0E0A           00283         MOVLW   0x0a
+0000F8 6EE5           00284         MOVWF   POSTDEC1
+0000FA 50??           00285         MOVF    r0x03, W
+0000FC 6EE5           00286         MOVWF   POSTDEC1
+0000FE 50??           00287         MOVF    r0x02, W
+000100 6EE5           00288         MOVWF   POSTDEC1
+000102 EC?? F0??      00289         CALL    __modsint
+000106 6E??           00290         MOVWF   r0x02
+000108 CFF3 F000      00291         MOVFF   PRODL, r0x03
+00010C 0E04           00292         MOVLW   0x04
+00010E 26E1           00293         ADDWF   FSR1L, F
+000110 50??           00294         MOVF    r0x02, W
+000112 6E??           00295         MOVWF   r0x01
+000114 D???           00296         BRA     _00135_DS_
+                      00297 ; ;multiply lit val:0x03 by variable r0x00 and store in r0x00
+000116                00298 _00125_DS_:
+                      00299 ;       .line   38; kernel.c    tempProc = pool[next];
+000116 50??           00300         MOVF    r0x00, W
+000118 0D03           00301         MULLW   0x03
+00011A 50F4           00302         MOVF    PRODH, W
+00011C 6E??           00303         MOVWF   r0x01
+00011E CFF3 F000      00304         MOVFF   PRODL, r0x00
+000122 0E??           00305         MOVLW   LOW(_pool)
+000124 26??           00306         ADDWF   r0x00, F
+000126 0E??           00307         MOVLW   HIGH(_pool)
+000128 22??           00308         ADDWFC  r0x01, F
+00012A C??? F???      00309         MOVFF   r0x00, FSR0L
+00012E C??? F???      00310         MOVFF   r0x01, FSR0H
+000132 CFEE F000      00311         MOVFF   POSTINC0, r0x02
+000136 CFEE F000      00312         MOVFF   POSTINC0, r0x03
+00013A CFEF F000      00313         MOVFF   INDF0, r0x04
+                      00314 ; ;multiply lit val:0x03 by variable _start and store in r0x05
+00013E ????           00315         BANKSEL _start
+                      00316 ;       .line   39; kernel.c    pool[next] = pool[start];
+000140 51??           00317         MOVF    _start, W, B
+000142 0D03           00318         MULLW   0x03
+gpasm-1.4.2 #1169 (Jan  2 2016) build/default   4-2-2018  11:14:55          PAGE  7
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+000144 50F4           00319         MOVF    PRODH, W
+000146 6E??           00320         MOVWF   r0x06
+000148 CFF3 F000      00321         MOVFF   PRODL, r0x05
+00014C 0E??           00322         MOVLW   LOW(_pool)
+00014E 26??           00323         ADDWF   r0x05, F
+000150 0E??           00324         MOVLW   HIGH(_pool)
+000152 22??           00325         ADDWFC  r0x06, F
+000154 C??? F???      00326         MOVFF   r0x05, FSR0L
+000158 C??? F???      00327         MOVFF   r0x06, FSR0H
+00015C CFEE F000      00328         MOVFF   POSTINC0, r0x05
+000160 CFEE F000      00329         MOVFF   POSTINC0, r0x06
+000164 CFEF F000      00330         MOVFF   INDF0, r0x07
+000168 C??? F???      00331         MOVFF   r0x00, FSR0L
+00016C C??? F???      00332         MOVFF   r0x01, FSR0H
+000170 C??? F???      00333         MOVFF   r0x05, POSTINC0
+000174 C??? F???      00334         MOVFF   r0x06, POSTINC0
+000178 C??? F???      00335         MOVFF   r0x07, INDF0
+                      00336 ; ;multiply lit val:0x03 by variable _start and store in r0x00
+00017C ????           00337         BANKSEL _start
+                      00338 ;       .line   40; kernel.c    pool[start] = tempProc;
+00017E 51??           00339         MOVF    _start, W, B
+000180 0D03           00340         MULLW   0x03
+000182 50F4           00341         MOVF    PRODH, W
+000184 6E??           00342         MOVWF   r0x01
+000186 CFF3 F000      00343         MOVFF   PRODL, r0x00
+00018A 0E??           00344         MOVLW   LOW(_pool)
+00018C 26??           00345         ADDWF   r0x00, F
+00018E 0E??           00346         MOVLW   HIGH(_pool)
+000190 22??           00347         ADDWFC  r0x01, F
+000192 C??? F???      00348         MOVFF   r0x00, FSR0L
+000196 C??? F???      00349         MOVFF   r0x01, FSR0H
+00019A C??? F???      00350         MOVFF   r0x02, POSTINC0
+00019E C??? F???      00351         MOVFF   r0x03, POSTINC0
+0001A2 C??? F???      00352         MOVFF   r0x04, INDF0
+                      00353 ; ;multiply lit val:0x03 by variable _start and store in r0x00
+0001A6                00354 _00126_DS_:
+0001A6 ????           00355         BANKSEL _start
+                      00356 ;       .line   43; kernel.c    while (pool[start]->start > 0) {
+0001A8 51??           00357         MOVF    _start, W, B
+0001AA 0D03           00358         MULLW   0x03
+0001AC 50F4           00359         MOVF    PRODH, W
+0001AE 6E??           00360         MOVWF   r0x01
+0001B0 CFF3 F000      00361         MOVFF   PRODL, r0x00
+0001B4 0E??           00362         MOVLW   LOW(_pool)
+0001B6 26??           00363         ADDWF   r0x00, F
+0001B8 0E??           00364         MOVLW   HIGH(_pool)
+0001BA 22??           00365         ADDWFC  r0x01, F
+0001BC C??? F???      00366         MOVFF   r0x00, FSR0L
+0001C0 C??? F???      00367         MOVFF   r0x01, FSR0H
+0001C4 CFEE F000      00368         MOVFF   POSTINC0, r0x00
+0001C8 CFEE F000      00369         MOVFF   POSTINC0, r0x01
+0001CC CFEF F000      00370         MOVFF   INDF0, r0x02
+0001D0 50??           00371         MOVF    r0x00, W
+gpasm-1.4.2 #1169 (Jan  2 2016) build/default   4-2-2018  11:14:55          PAGE  8
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+0001D2 0F05           00372         ADDLW   0x05
+0001D4 6E??           00373         MOVWF   r0x03
+0001D6 0E00           00374         MOVLW   0x00
+0001D8 20??           00375         ADDWFC  r0x01, W
+0001DA 6E??           00376         MOVWF   r0x04
+0001DC 0E00           00377         MOVLW   0x00
+0001DE 20??           00378         ADDWFC  r0x02, W
+0001E0 6E??           00379         MOVWF   r0x05
+0001E2 C??? F???      00380         MOVFF   r0x03, FSR0L
+0001E6 C??? F???      00381         MOVFF   r0x04, PRODL
+0001EA 50??           00382         MOVF    r0x05, W
+0001EC EC?? F0??      00383         CALL    __gptrget2
+0001F0 6E??           00384         MOVWF   r0x03
+0001F2 CFF3 F000      00385         MOVFF   PRODL, r0x04
+0001F6 50??           00386         MOVF    r0x04, W
+0001F8 0F80           00387         ADDLW   0x80
+0001FA 0F80           00388         ADDLW   0x80
+0001FC E1??           00389         BNZ     _00170_DS_
+0001FE 0E01           00390         MOVLW   0x01
+000200 5C??           00391         SUBWF   r0x03, W
+000202                00392 _00170_DS_:
+000202 E2??           00393         BC      _00126_DS_
+                      00394 ;       .line   46; kernel.c    if (pool[start]->function() == REPEAT) {
+000204 C??? F???      00395         MOVFF   r0x00, FSR0L
+000208 C??? F???      00396         MOVFF   r0x01, PRODL
+00020C 50??           00397         MOVF    r0x02, W
+00020E EC?? F0??      00398         CALL    __gptrget3
+000212 6E??           00399         MOVWF   r0x00
+000214 CFF3 F000      00400         MOVFF   PRODL, r0x01
+000218 CFF4 F000      00401         MOVFF   PRODH, r0x02
+00021C CFF2 FFE5      00402         MOVFF   INTCON, POSTDEC1
+000220 9EF2           00403         BCF     INTCON, 7
+000222 0005           00404         PUSH    
+000224 0E??           00405         MOVLW   LOW(_00171_DS_)
+000226 6EFD           00406         MOVWF   TOSL
+000228 0E??           00407         MOVLW   HIGH(_00171_DS_)
+00022A 6EFE           00408         MOVWF   TOSH
+00022C 0E??           00409         MOVLW   UPPER(_00171_DS_)
+00022E 6EFF           00410         MOVWF   TOSU
+000230 BEE4           00411         BTFSC   PREINC1, 7
+000232 8EF2           00412         BSF     INTCON, 7
+000234 C??? F???      00413         MOVFF   r0x02, PCLATU
+000238 C??? F???      00414         MOVFF   r0x01, PCLATH
+00023C 50??           00415         MOVF    r0x00, W
+00023E 6EF9           00416         MOVWF   PCL
+000240                00417 _00171_DS_:
+000240 6E??           00418         MOVWF   r0x00
+000242 50??           00419         MOVF    r0x00, W
+000244 0A02           00420         XORLW   0x02
+000246 E1??           00421         BNZ     _00130_DS_
+                      00422 ; ;multiply lit val:0x03 by variable _start and store in r0x00
+000248                00423 _00173_DS_:
+000248 ????           00424         BANKSEL _start
+gpasm-1.4.2 #1169 (Jan  2 2016) build/default   4-2-2018  11:14:55          PAGE  9
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+                      00425 ;       .line   47; kernel.c    kernelAddProc(pool[start]);
+00024A 51??           00426         MOVF    _start, W, B
+00024C 0D03           00427         MULLW   0x03
+00024E 50F4           00428         MOVF    PRODH, W
+000250 6E??           00429         MOVWF   r0x01
+000252 CFF3 F000      00430         MOVFF   PRODL, r0x00
+000256 0E??           00431         MOVLW   LOW(_pool)
+000258 26??           00432         ADDWF   r0x00, F
+00025A 0E??           00433         MOVLW   HIGH(_pool)
+00025C 22??           00434         ADDWFC  r0x01, F
+00025E C??? F???      00435         MOVFF   r0x00, FSR0L
+000262 C??? F???      00436         MOVFF   r0x01, FSR0H
+000266 CFEE F000      00437         MOVFF   POSTINC0, r0x00
+00026A CFEE F000      00438         MOVFF   POSTINC0, r0x01
+00026E CFEF F000      00439         MOVFF   INDF0, r0x02
+000272 50??           00440         MOVF    r0x02, W
+000274 6EE5           00441         MOVWF   POSTDEC1
+000276 50??           00442         MOVF    r0x01, W
+000278 6EE5           00443         MOVWF   POSTDEC1
+00027A 50??           00444         MOVF    r0x00, W
+00027C 6EE5           00445         MOVWF   POSTDEC1
+00027E EC?? F0??      00446         CALL    _kernelAddProc
+000282 0E03           00447         MOVLW   0x03
+000284 26E1           00448         ADDWF   FSR1L, F
+000286                00449 _00130_DS_:
+                      00450 ;       .line   49; kernel.c    start = (start + 1) % POOLSIZE;
+000286 C??? F???      00451         MOVFF   _start, r0x00
+00028A 6A??           00452         CLRF    r0x01
+00028C 4A??           00453         INFSNZ  r0x00, F
+00028E 2A??           00454         INCF    r0x01, F
+000290 0E00           00455         MOVLW   0x00
+000292 6EE5           00456         MOVWF   POSTDEC1
+000294 0E0A           00457         MOVLW   0x0a
+000296 6EE5           00458         MOVWF   POSTDEC1
+000298 50??           00459         MOVF    r0x01, W
+00029A 6EE5           00460         MOVWF   POSTDEC1
+00029C 50??           00461         MOVF    r0x00, W
+00029E 6EE5           00462         MOVWF   POSTDEC1
+0002A0 EC?? F0??      00463         CALL    __modsint
+0002A4 6E??           00464         MOVWF   r0x00
+0002A6 CFF3 F000      00465         MOVFF   PRODL, r0x01
+0002AA 0E04           00466         MOVLW   0x04
+0002AC 26E1           00467         ADDWF   FSR1L, F
+0002AE 50??           00468         MOVF    r0x00, W
+0002B0 ????           00469         BANKSEL _start
+0002B2 6F??           00470         MOVWF   _start, B
+0002B4 D???           00471         BRA     _00137_DS_
+0002B6 CFE4 F000      00472         MOVFF   PREINC1, r0x07
+0002BA CFE4 F000      00473         MOVFF   PREINC1, r0x06
+0002BE CFE4 F000      00474         MOVFF   PREINC1, r0x05
+0002C2 CFE4 F000      00475         MOVFF   PREINC1, r0x04
+0002C6 CFE4 F000      00476         MOVFF   PREINC1, r0x03
+0002CA CFE4 F000      00477         MOVFF   PREINC1, r0x02
+gpasm-1.4.2 #1169 (Jan  2 2016) build/default   4-2-2018  11:14:55          PAGE 10
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+0002CE CFE4 F000      00478         MOVFF   PREINC1, r0x01
+0002D2 CFE4 F000      00479         MOVFF   PREINC1, r0x00
+0002D6 CFE4 FFD9      00480         MOVFF   PREINC1, FSR2L
+0002DA 0012           00481         RETURN  
+                      00482 
+                      00483 ; ; Starting pCode block
+                      00484 S_kernel__kernelAddProc code
+000000                00485 _kernelAddProc:
+                      00486 ;       .line   13; kernel.c    char kernelAddProc(process* newProc) {
+000000 CFD9 FFE5      00487         MOVFF   FSR2L, POSTDEC1
+000004 CFE1 FFD9      00488         MOVFF   FSR1L, FSR2L
+000008 C??? F???      00489         MOVFF   r0x00, POSTDEC1
+00000C C??? F???      00490         MOVFF   r0x01, POSTDEC1
+000010 C??? F???      00491         MOVFF   r0x02, POSTDEC1
+000014 C??? F???      00492         MOVFF   r0x03, POSTDEC1
+000018 C??? F???      00493         MOVFF   r0x04, POSTDEC1
+00001C C??? F???      00494         MOVFF   r0x05, POSTDEC1
+000020 C??? F???      00495         MOVFF   r0x06, POSTDEC1
+000024 C??? F???      00496         MOVFF   r0x07, POSTDEC1
+000028 0E02           00497         MOVLW   0x02
+00002A CFDB F000      00498         MOVFF   PLUSW2, r0x00
+00002E 0E03           00499         MOVLW   0x03
+000030 CFDB F000      00500         MOVFF   PLUSW2, r0x01
+000034 0E04           00501         MOVLW   0x04
+000036 CFDB F000      00502         MOVFF   PLUSW2, r0x02
+                      00503 ;       .line   15; kernel.c    if (((end + 1) % POOLSIZE) != start) {
+00003A C??? F???      00504         MOVFF   _end, r0x03
+00003E 6A??           00505         CLRF    r0x04
+000040 4A??           00506         INFSNZ  r0x03, F
+000042 2A??           00507         INCF    r0x04, F
+000044 0E00           00508         MOVLW   0x00
+000046 6EE5           00509         MOVWF   POSTDEC1
+000048 0E0A           00510         MOVLW   0x0a
+00004A 6EE5           00511         MOVWF   POSTDEC1
+00004C 50??           00512         MOVF    r0x04, W
+00004E 6EE5           00513         MOVWF   POSTDEC1
+000050 50??           00514         MOVF    r0x03, W
+000052 6EE5           00515         MOVWF   POSTDEC1
+000054 EC?? F0??      00516         CALL    __modsint
+000058 6E??           00517         MOVWF   r0x03
+00005A CFF3 F000      00518         MOVFF   PRODL, r0x04
+00005E 0E04           00519         MOVLW   0x04
+000060 26E1           00520         ADDWF   FSR1L, F
+000062 C??? F???      00521         MOVFF   _start, r0x05
+000066 6A??           00522         CLRF    r0x06
+000068 50??           00523         MOVF    r0x03, W
+00006A 18??           00524         XORWF   r0x05, W
+00006C E1??           00525         BNZ     _00118_DS_
+00006E 50??           00526         MOVF    r0x04, W
+000070 18??           00527         XORWF   r0x06, W
+000072 E1??           00528         BNZ     _00118_DS_
+000074 D???           00529         BRA     _00111_DS_
+                      00530 ; ;multiply lit val:0x03 by variable _end and store in r0x03
+gpasm-1.4.2 #1169 (Jan  2 2016) build/default   4-2-2018  11:14:55          PAGE 11
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+000076                00531 _00118_DS_:
+000076 ????           00532         BANKSEL _end
+                      00533 ;       .line   16; kernel.c    pool[end] = newProc;
+000078 51??           00534         MOVF    _end, W, B
+00007A 0D03           00535         MULLW   0x03
+00007C 50F4           00536         MOVF    PRODH, W
+00007E 6E??           00537         MOVWF   r0x04
+000080 CFF3 F000      00538         MOVFF   PRODL, r0x03
+000084 0E??           00539         MOVLW   LOW(_pool)
+000086 26??           00540         ADDWF   r0x03, F
+000088 0E??           00541         MOVLW   HIGH(_pool)
+00008A 22??           00542         ADDWFC  r0x04, F
+00008C C??? F???      00543         MOVFF   r0x03, FSR0L
+000090 C??? F???      00544         MOVFF   r0x04, FSR0H
+000094 C??? F???      00545         MOVFF   r0x00, POSTINC0
+000098 C??? F???      00546         MOVFF   r0x01, POSTINC0
+00009C C??? F???      00547         MOVFF   r0x02, INDF0
+                      00548 ; ;multiply lit val:0x03 by variable _end and store in r0x03
+0000A0 ????           00549         BANKSEL _end
+                      00550 ;       .line   17; kernel.c    pool[end]->start += newProc->period;
+0000A2 51??           00551         MOVF    _end, W, B
+0000A4 0D03           00552         MULLW   0x03
+0000A6 50F4           00553         MOVF    PRODH, W
+0000A8 6E??           00554         MOVWF   r0x04
+0000AA CFF3 F000      00555         MOVFF   PRODL, r0x03
+0000AE 0E??           00556         MOVLW   LOW(_pool)
+0000B0 26??           00557         ADDWF   r0x03, F
+0000B2 0E??           00558         MOVLW   HIGH(_pool)
+0000B4 22??           00559         ADDWFC  r0x04, F
+0000B6 C??? F???      00560         MOVFF   r0x03, FSR0L
+0000BA C??? F???      00561         MOVFF   r0x04, FSR0H
+0000BE CFEE F000      00562         MOVFF   POSTINC0, r0x03
+0000C2 CFEE F000      00563         MOVFF   POSTINC0, r0x04
+0000C6 CFEF F000      00564         MOVFF   INDF0, r0x05
+0000CA 0E05           00565         MOVLW   0x05
+0000CC 26??           00566         ADDWF   r0x03, F
+0000CE 0E00           00567         MOVLW   0x00
+0000D0 22??           00568         ADDWFC  r0x04, F
+0000D2 22??           00569         ADDWFC  r0x05, F
+0000D4 C??? F???      00570         MOVFF   r0x03, FSR0L
+0000D8 C??? F???      00571         MOVFF   r0x04, PRODL
+0000DC 50??           00572         MOVF    r0x05, W
+0000DE EC?? F0??      00573         CALL    __gptrget2
+0000E2 6E??           00574         MOVWF   r0x06
+0000E4 CFF3 F000      00575         MOVFF   PRODL, r0x07
+0000E8 0E03           00576         MOVLW   0x03
+0000EA 26??           00577         ADDWF   r0x00, F
+0000EC 0E00           00578         MOVLW   0x00
+0000EE 22??           00579         ADDWFC  r0x01, F
+0000F0 22??           00580         ADDWFC  r0x02, F
+0000F2 C??? F???      00581         MOVFF   r0x00, FSR0L
+0000F6 C??? F???      00582         MOVFF   r0x01, PRODL
+0000FA 50??           00583         MOVF    r0x02, W
+gpasm-1.4.2 #1169 (Jan  2 2016) build/default   4-2-2018  11:14:55          PAGE 12
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+0000FC EC?? F0??      00584         CALL    __gptrget2
+000100 6E??           00585         MOVWF   r0x00
+000102 CFF3 F000      00586         MOVFF   PRODL, r0x01
+000106 50??           00587         MOVF    r0x00, W
+000108 26??           00588         ADDWF   r0x06, F
+00010A 50??           00589         MOVF    r0x01, W
+00010C 22??           00590         ADDWFC  r0x07, F
+00010E C??? F???      00591         MOVFF   r0x06, POSTDEC1
+000112 C??? F???      00592         MOVFF   r0x07, PRODH
+000116 C??? F???      00593         MOVFF   r0x03, FSR0L
+00011A C??? F???      00594         MOVFF   r0x04, PRODL
+00011E 50??           00595         MOVF    r0x05, W
+000120 EC?? F0??      00596         CALL    __gptrput2
+                      00597 ;       .line   18; kernel.c    end = (end + 1) % POOLSIZE;
+000124 C??? F???      00598         MOVFF   _end, r0x00
+000128 6A??           00599         CLRF    r0x01
+00012A 4A??           00600         INFSNZ  r0x00, F
+00012C 2A??           00601         INCF    r0x01, F
+00012E 0E00           00602         MOVLW   0x00
+000130 6EE5           00603         MOVWF   POSTDEC1
+000132 0E0A           00604         MOVLW   0x0a
+000134 6EE5           00605         MOVWF   POSTDEC1
+000136 50??           00606         MOVF    r0x01, W
+000138 6EE5           00607         MOVWF   POSTDEC1
+00013A 50??           00608         MOVF    r0x00, W
+00013C 6EE5           00609         MOVWF   POSTDEC1
+00013E EC?? F0??      00610         CALL    __modsint
+000142 6E??           00611         MOVWF   r0x00
+000144 CFF3 F000      00612         MOVFF   PRODL, r0x01
+000148 0E04           00613         MOVLW   0x04
+00014A 26E1           00614         ADDWF   FSR1L, F
+00014C 50??           00615         MOVF    r0x00, W
+00014E ????           00616         BANKSEL _end
+000150 6F??           00617         MOVWF   _end, B
+                      00618 ;       .line   19; kernel.c    return SUCCESS;
+000152 6AE8           00619         CLRF    WREG
+000154 D???           00620         BRA     _00112_DS_
+000156                00621 _00111_DS_:
+                      00622 ;       .line   21; kernel.c    return FAIL;
+000156 0E01           00623         MOVLW   0x01
+000158                00624 _00112_DS_:
+000158 CFE4 F000      00625         MOVFF   PREINC1, r0x07
+00015C CFE4 F000      00626         MOVFF   PREINC1, r0x06
+000160 CFE4 F000      00627         MOVFF   PREINC1, r0x05
+000164 CFE4 F000      00628         MOVFF   PREINC1, r0x04
+000168 CFE4 F000      00629         MOVFF   PREINC1, r0x03
+00016C CFE4 F000      00630         MOVFF   PREINC1, r0x02
+000170 CFE4 F000      00631         MOVFF   PREINC1, r0x01
+000174 CFE4 F000      00632         MOVFF   PREINC1, r0x00
+000178 CFE4 FFD9      00633         MOVFF   PREINC1, FSR2L
+00017C 0012           00634         RETURN  
+                      00635 
+                      00636 ; ; Starting pCode block
+gpasm-1.4.2 #1169 (Jan  2 2016) build/default   4-2-2018  11:14:55          PAGE 13
+
+
+LOC    OBJECT CODE    LINE  SOURCE TEXT
+  VALUE
+
+                      00637 S_kernel__kernelInit    code
+000000                00638 _kernelInit:
+                      00639 ;       .line   7; kernel.c     char kernelInit(void) {
+000000 CFD9 FFE5      00640         MOVFF   FSR2L, POSTDEC1
+000004 CFE1 FFD9      00641         MOVFF   FSR1L, FSR2L
+000008 ????           00642         BANKSEL _start
+                      00643 ;       .line   8; kernel.c     start = 0;
+00000A 6B??           00644         CLRF    _start, B
+00000C ????           00645         BANKSEL _end
+                      00646 ;       .line   9; kernel.c     end = 0;
+00000E 6B??           00647         CLRF    _end, B
+                      00648 ;       .line   10; kernel.c    return SUCCESS;
+000010 6AE8           00649         CLRF    WREG
+000012 CFE4 FFD9      00650         MOVFF   PREINC1, FSR2L
+000016 0012           00651         RETURN  
+                      00652 
+                      00653 
+                      00654 
+                      00655 ; Statistics:
+                      00656 ; code size:     1372 (0x055c) bytes ( 1.05%)
+                      00657 ;                 686 (0x02ae) words
+                      00658 ; udata size:      32 (0x0020) bytes ( 2.50%)
+                      00659 ; access size:      8 (0x0008) bytes
+                      00660 
+                      00661 
+                      00662         end
+gpasm-1.4.2 #1169 (Jan  2 2016) build/default   4-2-2018  11:14:55          PAGE 14
+
+
+SYMBOL TABLE
+  LABEL                             VALUE
+
+FSR0H                             00000FEA
+FSR0L                             00000FE9
+FSR1L                             00000FE1
+FSR2L                             00000FD9
+INDF0                             00000FEF
+INTCON                            00000FF2
+PCL                               00000FF9
+PCLATH                            00000FFA
+PCLATU                            00000FFB
+PLUSW2                            00000FDB
+POSTDEC1                          00000FE5
+POSTINC0                          00000FEE
+PREINC1                           00000FE4
+PRODH                             00000FF4
+PRODL                             00000FF3
+STATUS                            00000FD8
+TOSH                              00000FFE
+TOSL                              00000FFD
+TOSU                              00000FFF
+WREG                              00000FE8
+_00111_DS_                        00000156
+_00112_DS_                        00000158
+_00118_DS_                        00000076
+_00125_DS_                        00000116
+_00126_DS_                        000001A6
+_00130_DS_                        00000286
+_00135_DS_                        0000003A
+_00136_DS_                        000000E8
+_00137_DS_                        00000028
+_00168_DS_                        00000044
+_00169_DS_                        000000E2
+_00170_DS_                        00000202
+_00171_DS_                        00000240
+_00173_DS_                        00000248
+_00182_DS_                        00000024
+_00183_DS_                        0000009E
+_00184_DS_                        000000CC
+_00196_DS_                        0000002E
+_00197_DS_                        00000080
+_KernelClock                      00000000
+__18F4520                         00000001
+__ACC_RAM_LOW_END                 0000007F
+__ACC_RAM_LOW_START               00000000
+__CODE_END                        00007FFF
+__CODE_START                      00000000
+__CONFIG_END                      0030000D
+__CONFIG_START                    00300000
+__EEPROM_END                      00F000FF
+__EEPROM_START                    00F00000
+__IDLOCS_END                      00200007
+__IDLOCS_START                    00200000
+__VECTOR_INT_HIGH                 00000008
+__VECTOR_INT_LOW                  00000018
+gpasm-1.4.2 #1169 (Jan  2 2016) build/default   4-2-2018  11:14:55          PAGE 15
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+__VECTOR_RESET                    00000000
+__gptrget2                        00000000
+__gptrget3                        00000000
+__gptrput2                        00000000
+__modsint                         00000000
+_end                              00000000
+_kernelAddProc                    00000000
+_kernelInit                       00000000
+_kernelLoop                       00000000
+_pool                             00000000
+_start                            00000000
+r0x00                             00000000
+r0x01                             00000001
+r0x02                             00000002
+r0x03                             00000003
+r0x04                             00000004
+r0x05                             00000005
+r0x06                             00000006
+r0x07                             00000007
+
+Errors   :     0
+Warnings :     0 reported,     0 suppressed
+Messages :     0 reported,     0 suppressed
+
+

@@ -1,0 +1,12 @@
+{
+  "name": "mqtt-temperatura",
+  "version": "1.0.0",
+  "description": "Sensor de temperatura e atuador via MQTT (EMQX local)",
+  "scripts": {
+    "sensor": "node sensor.js",
+    "atuador": "node atuador.js"
+  },
+  "dependencies": {
+    "mqtt": "^5.10.0"
+  }
+}

@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Painel | Laboratório nginx + WAF</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="/static/painel.js" defer></script>
+</head>
+<body>
+  <main class="card">
+    <p class="selo">Login efetuado com sucesso</p>
+    <h1>Bem-vindo, <span id="usuario">...</span></h1>
+    <p class="sub">Você está autenticado no sistema.</p>
+
+    <dl class="dados">
+      <dt>Réplica que atendeu</dt>
+      <dd id="replica">...</dd>
+      <dt>Sessão expira em</dt>
+      <dd>10 minutos</dd>
+    </dl>
+
+    <button type="button" id="btn-sair" class="primario">Sair</button>
+  </main>
+</body>
+</html>
