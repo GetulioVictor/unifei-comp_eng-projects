@@ -266,7 +266,7 @@ todas as portas do navegador.
 - Ponto único de falha: `docker stop redis` derruba login e sessão. Bom ponto para discutir
   replicação do Redis (Sentinel) como melhoria futura.
 
-## Experimentos sugeridos para a apresentação
+## Experimentos
 
 1. Faça login e atualize o painel várias vezes: a réplica alterna entre app1, app2 e app3.
 2. Derrube a réplica que aparece no painel (`docker stop app1`) e atualize: a sessão continua
@@ -298,17 +298,7 @@ docker logs waf 2>&1 | grep -o '"ruleId":"[0-9]*"\|"message":"[^"]*"'
 docker compose down
 ```
 
-## Problemas comuns
-
-| Problema                                  | Solução                                                    |
-|-------------------------------------------|------------------------------------------------------------|
-| `port is already allocated`               | Troque a porta da esquerda em `ports:` no compose          |
-| `permission denied` ao rodar `./waf.sh`   | `chmod +x waf.sh test.sh`                                  |
-| `permission denied` ao usar o Docker      | `sudo usermod -aG docker $USER` e abra uma nova sessão     |
-| Login retorna "Muitas tentativas"         | Rate limit ativo; espere 1 minuto                          |
-| Algum container `unhealthy`               | `docker compose logs <nome>` para ver o erro               |
-
-## Aviso
+## Observação
 
 Com `APP_SQL_SEGURO=false` a aplicação é vulnerável a SQL Injection, e a página de login é sempre
 vulnerável a XSS, de propósito, para demonstrar o WAF. Use apenas localmente.
