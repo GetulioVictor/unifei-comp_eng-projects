@@ -263,8 +263,7 @@ todas as portas do navegador.
   veja a réplica mudar sem perder o login).
 - Health checks: o Compose só inicia o balanceador quando as réplicas estão saudáveis.
 - Defesa em camadas: WAF, balanceador e aplicação, cada um com sua responsabilidade.
-- Ponto único de falha: `docker stop redis` derruba login e sessão. Bom ponto para discutir
-  replicação do Redis (Sentinel) como melhoria futura.
+- Ponto único de falha: `docker stop redis` derruba login e sessão.
 
 ## Experimentos
 
